@@ -3,6 +3,7 @@ import sys
 import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from pythonjsonlogger.json import JsonFormatter
 
 def setup_logging(log_file="output/scraper.log"):
     # Convert log_file to an absolute path based on the script's location
@@ -16,8 +17,15 @@ def setup_logging(log_file="output/scraper.log"):
     log_level_str = os.getenv("LOG_LEVEL", "INFO").upper()
     log_level = logging.getLevelName(log_level_str)
     
-    # Format
-    formatter = logging.Formatter(
+    # JSON Formatter (for stdout/Loki)
+    json_formatter = JsonFormatter(
+        "%(asctime)s %(levelname)s %(name)s %(message)s",
+        rename_fields={"asctime": "timestamp", "levelname": "level", "name": "logger"},
+        timestamp=True,
+    )
+    
+    # Plain text formatter (for local file)
+    file_formatter = logging.Formatter(
         fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
         datefmt="%Y-%m-%dT%H:%M:%S%z"
     )
@@ -29,12 +37,12 @@ def setup_logging(log_file="output/scraper.log"):
         backupCount=3,
         encoding="utf-8"
     )
-    file_handler.setFormatter(formatter)
+    file_handler.setFormatter(file_formatter)
     file_handler.setLevel(log_level)
     
     # Stream Handler (stdout)
     stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setFormatter(formatter)
+    stream_handler.setFormatter(json_formatter)
     stream_handler.setLevel(log_level)
     
     # Root logger setup

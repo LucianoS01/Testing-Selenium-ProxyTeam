@@ -1,7 +1,33 @@
 config:
   clients:
-    - url: http://loki:3100/loki/api/v1/push
+    - url: http://loki.observability.svc.cluster.local:3100/loki/api/v1/push
 
-# Extra labels for pods
-extraArgs:
-  - -client.external-labels=cluster=k3s
+  snippets:
+    extraScrapeConfigs: |
+      - job_name: ml-scraper-pods
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [ml-scraper]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: scraper
+            action: keep
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
+          - source_labels: [__meta_kubernetes_pod_label_job_name]
+            target_label: job_name
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: node
+          - source_labels:
+              - __meta_kubernetes_pod_uid
+              - __meta_kubernetes_pod_container_name
+            target_label: __path__
+            separator: /
+            replacement: /var/log/pods/*$1/*.log

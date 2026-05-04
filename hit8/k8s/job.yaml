@@ -27,7 +27,7 @@ spec:
                   key: POSTGRES_PASSWORD
       containers:
         - name: scraper
-          image: ml-scraper:latest
+          image: ml-scraper:v4
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:

@@ -78,8 +78,14 @@ def main() -> None:
     max_pages = MAX_PAGES
 
     logger.info(
-        "Iniciando scraper | productos=%d | browser=%s | headless=%s | max_pages=%d | delay=%ds",
-        len(products), browser, headless, max_pages, DELAY_BETWEEN_PRODUCTS,
+        "Iniciando scraper",
+        extra={
+            "productos_count": len(products),
+            "browser": browser,
+            "headless": headless,
+            "max_pages": max_pages,
+            "delay": DELAY_BETWEEN_PRODUCTS,
+        },
     )
 
     # Ejecutar migrations de Postgres (solo si está habilitado)
@@ -94,7 +100,7 @@ def main() -> None:
 
     try:
         for idx, product in enumerate(products):
-            logger.info("=== Procesando producto: %s ===", product)
+            logger.info("Procesando producto", extra={"producto": product})
             results = scrape_all_pages(
                 driver, product, max_pages=max_pages, results_per_page=10
             )
@@ -104,7 +110,8 @@ def main() -> None:
                 save_json(results, product)
             else:
                 logger.warning(
-                    "Sin resultados para el producto '%s', no se escribe JSON", product
+                    "Sin resultados para el producto, no se escribe JSON",
+                    extra={"producto": product}
                 )
 
             # Persistir en Postgres (opcional)

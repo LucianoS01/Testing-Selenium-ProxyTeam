@@ -80,7 +80,14 @@ def deduplicate(results: list[dict]) -> list[dict]:
             unique.append(r)
         elif not key:
             unique.append(r)  # sin link: incluir igual, no se puede deduplicar
-    logger.info("Deduplicados: %d → %d", len(results), len(unique))
+    logger.info(
+        "Deduplicación completada",
+        extra={
+            "original_count": len(results),
+            "unique_count": len(unique),
+            "duplicates_removed": len(results) - len(unique)
+        }
+    )
     return unique
 
 
@@ -135,8 +142,13 @@ def _extract_page_results(driver, cards, product: str, page: int) -> list[dict]:
             results.append(item)
         except Exception as e:
             logger.error(
-                "Resultado %d descartado | producto=%s | página=%d | %s",
-                idx, product, page, e,
+                "Resultado descartado por error en extracción",
+                extra={
+                    "resultado_index": idx,
+                    "producto": product,
+                    "página": page,
+                    "error": str(e)
+                },
                 exc_info=True,
             )
     return results
@@ -173,8 +185,14 @@ def scrape_all_pages(
         offset = (page - 1) * results_per_page
         url = build_page_url(product, offset)
         logger.info(
-            "Scrapeando página %d/%d | producto=%s | offset=%d",
-            page, max_pages, product, offset,
+            "Iniciando scrapeo de página",
+            extra={
+                "página": page,
+                "total_páginas": max_pages,
+                "producto": product,
+                "offset": offset,
+                "url": url
+            }
         )
         try:
             _load_page_with_retry(driver, url)
@@ -188,8 +206,13 @@ def scrape_all_pages(
             page_results = _extract_page_results(driver, cards, product, page)
             all_results.extend(page_results)
             logger.info(
-                "Página %d completada | resultados=%d | acumulado=%d",
-                page, len(page_results), len(all_results),
+                "Página completada",
+                extra={
+                    "página": page,
+                    "resultados_página": len(page_results),
+                    "acumulado_total": len(all_results),
+                    "producto": product
+                }
             )
             time.sleep(3)
         except Exception as e:
