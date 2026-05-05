@@ -1,0 +1,70 @@
+fluentbit:
+  image:
+    repository: fluent/fluent-bit
+    tag: 3.2.0 # Versión pinneada 3.2.x
+  daemonSet:
+    enabled: true # Asegura que Fluent Bit se ejecute en todos los nodos
+  hostPath:
+    enabled: true
+    path: /var/log
+    type: DirectoryOrCreate
+  rbac:
+    create: true # Habilita RBAC para obtener metadatos de Kubernetes
+  serviceAccount:
+    create: true
+    name: fluent-bit-scraper
+
+  config:
+    inputs: |
+      [INPUT]
+          Name              tail
+          Tag               kube.*
+          Path              /var/log/containers/*ml-scraper*.log # Recolecta logs del scraper
+          Parser            json_parser # Usa el parser JSON definido
+          DB                /var/log/flb_kube.db
+          Mem_Buf_Limit     5MB
+          Skip_Long_Lines   On
+          Refresh_Interval  5
+    filters: |
+      [FILTER]
+          Name              kubernetes
+          Match             kube.*
+          Kube_URL          https://kubernetes.default.svc:443
+          Kube_CA_File      /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          Kube_Token_File   /var/run/secrets/kubernetes.io/serviceaccount/token
+          Kube_Tag_Prefix   kube.var.log.containers.
+          Merge_Log         On
+          Merge_Log_Key     log_processed
+          Keep_Log          Off
+          Use_Kubelet       Off
+          Buffer_Size       0
+      [FILTER]
+          Name              parser
+          Match             kube.*
+          Key_Name          log_processed
+          Parser            json_parser
+          Reserve_Data      On
+          Preserve_Key      On
+    outputs: |
+      [OUTPUT]
+          Name              es
+          Match             kube.*
+          Host              elasticsearch-scraper-es-http.elastic.svc.cluster.local # Servicio de Elasticsearch
+          Port              9200
+          TLS               On
+          TLS.Verify        Off # Desactivado para desarrollo, como solicitado
+          Index             scraper-logs- # Prefijo para los índices
+          Type              _doc
+          Logstash_Format   On
+          Logstash_Prefix   scraper-logs
+          Time_Key          @timestamp
+          HTTP_User         elastic
+          # HTTP_Passwd se inyectará desde el script de instalación para evitar credenciales en archivos
+          Suppress_Type_Name On
+    parsers: |
+      [PARSER]
+          Name   json_parser
+          Format json
+          Time_Key time # Asumiendo que el log JSON del scraper tiene un campo 'time'
+          Time_Format %Y-%m-%dT%H:%M:%S.%L%z # Formato ISO 8601 con milisegundos y zona horaria
+          Time_Keep On

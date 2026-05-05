@@ -1,0 +1,47 @@
+{
+  "index_template": {
+    "index_patterns": ["scraper-logs-*"],
+    "template": {
+      "settings": {
+        "index.lifecycle.name": "scraper_ilm_policy",
+        "index.lifecycle.rollover_alias": "scraper-logs",
+        "index.mapping.total_fields.limit": 2000
+      },
+      "mappings": {
+        "properties": {
+          "@timestamp": {
+            "type": "date",
+            "format": "strict_date_optional_time||epoch_millis"
+          },
+          "time": {
+            "type": "date",
+            "format": "strict_date_optional_time||epoch_millis"
+          },
+          "log_processed": {
+            "type": "text"
+          },
+          "kubernetes": {
+            "properties": {
+              "container_name": {"type": "keyword"},
+              "pod_name": {"type": "keyword"},
+              "namespace_name": {"type": "keyword"}
+            }
+          },
+          "level": { "type": "keyword" },
+          "producto": { "type": "keyword" },
+          "titulo": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } } },
+          "precio": { "type": "float" },
+          "link": { "type": "keyword" },
+          "tienda_oficial": { "type": "boolean" },
+          "envio_gratis": { "type": "boolean" }
+        }
+      }
+    },
+    "priority": 500,
+    "composed_of": [],
+    "version": 1,
+    "_meta": {
+      "description": "Template for scraper logs with ILM"
+    }
+  }
+}
