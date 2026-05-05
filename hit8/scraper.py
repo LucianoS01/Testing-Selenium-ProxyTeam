@@ -63,7 +63,10 @@ def save_json(results: list[dict], product: str) -> None:
     out_path = OUTPUT_DIR / f"{filename}.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
-    logger.info("JSON escrito exitosamente -> %s", out_path)
+    logger.info(
+        "JSON escrito exitosamente",
+        extra={"output_path": str(out_path), "product": product}
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -124,7 +127,10 @@ def main() -> None:
 
             # Pausa entre productos para evitar throttling (excepto el último)
             if idx < len(products) - 1:
-                logger.info("Esperando %ds antes del siguiente producto...", DELAY_BETWEEN_PRODUCTS)
+                logger.info(
+                    "Esperando antes del siguiente producto",
+                    extra={"delay_seconds": DELAY_BETWEEN_PRODUCTS}
+                )
                 time.sleep(DELAY_BETWEEN_PRODUCTS)
 
     finally:

@@ -26,7 +26,7 @@ def setup_logging(log_file="output/scraper.log"):
     
     # Plain text formatter (for local file)
     file_formatter = logging.Formatter(
-        fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+        fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s", 
         datefmt="%Y-%m-%dT%H:%M:%S%z"
     )
     
