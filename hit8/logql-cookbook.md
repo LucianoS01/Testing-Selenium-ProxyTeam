@@ -30,7 +30,7 @@ sum by (producto) (
 
 ---
 
-## 2. Tasa de WARNINGs por minuto
+## 2. Tasa de WARNINGs por minuto..
 
 **Pregunta de Negocio:** ¿Existe inestabilidad reciente en los selectores o en la extracción de datos, manifestada por un aumento en los warnings?
 
