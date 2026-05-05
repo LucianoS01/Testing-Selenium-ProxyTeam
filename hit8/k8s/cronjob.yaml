@@ -24,7 +24,7 @@ spec:
           initContainers:
             - name: wait-for-postgres
               image: postgres:16-alpine
-              command: ['sh', '-c', 'until pg_isready -h postgres.default.svc.cluster.local -U scraper; do echo "esperando postgres..."; sleep 2; done']
+              command: ['sh', '-c', 'until pg_isready -h postgres.default.svc.cluster.local -U scraper -d scraper_db; do echo "esperando postgres..."; sleep 2; done']
               env:
                 - name: PGPASSWORD
                   valueFrom:

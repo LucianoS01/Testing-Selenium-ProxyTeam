@@ -9,7 +9,7 @@ data:
   HEADLESS: "true"
   LOG_LEVEL: "INFO"
   MAX_PAGES: "3"
-  POSTGRES_HOST: "postgres.default.svc.cluster.local"
+  POSTGRES_HOST: "postgres.default.svc.cluster.local" # Ya estaba correcto
   POSTGRES_PORT: "5432"
   POSTGRES_DB: "scraper_db"
   PRODUCTS: |
